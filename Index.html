@@ -3,30 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>שלט לטלוויזיה</title>
+<title>מכשירים ברשת הביתית</title>
 <style>
-button {
-  font-size: 20px;
-  margin: 10px;
-  padding: 15px 30px;
-}
+body { font-family: Arial, sans-serif; padding: 20px; }
+h1 { text-align: center; }
+ul { list-style-type: none; padding: 0; }
+li { padding: 10px; background: #f0f0f0; margin: 5px 0; border-radius: 5px; }
 </style>
 </head>
 <body>
-<h1>שלט לטלוויזיה</h1>
-<button onclick="send('KEY_VOLUP')">🔊 +Volume</button>
-<button onclick="send('KEY_VOLDOWN')">🔉 -Volume</button>
-<button onclick="send('KEY_MUTE')">🔇 Mute</button>
-<button onclick="send('KEY_POWEROFF')">⏻ Power</button>
-
-<script>
-function send(cmd) {
-    fetch("/command", {
-        method: "POST",
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: "cmd=" + cmd
-    }).then(r => console.log("Sent", cmd));
-}
-</script>
+<h1>מכשירים פעילים ברשת הביתית</h1>
+<ul>
+  {% for device in devices %}
+    <li>{{ device }}</li>
+  {% endfor %}
+</ul>
 </body>
 </html>
