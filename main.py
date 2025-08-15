@@ -1,44 +1,28 @@
-# main.py
-from flask import Flask, render_template, request
-import websocket
-import json
+from flask import Flask, render_template
+import subprocess
+import platform
+import ipaddress
 
 app = Flask(__name__)
 
-# כתובת IP של הטלוויזיה
-TV_IP = "192.168.1.50"
-PORT = 8001
-WS_URL = f"ws://{TV_IP}:{PORT}/api/v2/channels/samsung.remote.control"
+# כתובת רשת שלך – שנה לפי הצורך
+NETWORK = "192.168.1.0/24"
 
-def send_command(command):
-    try:
-        ws = websocket.WebSocket()
-        ws.connect(WS_URL)
-        payload = {
-            "method": "ms.remote.control",
-            "params": {
-                "Cmd": "Click",
-                "DataOfCmd": command,
-                "Option": "false",
-                "TypeOfRemote": "SendRemoteKey"
-            }
-        }
-        ws.send(json.dumps(payload))
-        ws.close()
-        return True
-    except Exception as e:
-        print("שגיאה בשליחת פקודה:", e)
-        return False
+def scan_network():
+    active_devices = []
+    param = "-n" if platform.system().lower()=="windows" else "-c"
+
+    for ip in ipaddress.IPv4Network(NETWORK):
+        res = subprocess.run(["ping", param, "1", "-w", "1000", str(ip)],
+                             stdout=subprocess.DEVNULL)
+        if res.returncode == 0:
+            active_devices.append(str(ip))
+    return active_devices
 
 @app.route("/")
 def index():
-    return render_template("index.html")
-
-@app.route("/command", methods=["POST"])
-def command():
-    cmd = request.form.get("cmd")
-    success = send_command(cmd)
-    return "OK" if success else "ERROR"
+    devices = scan_network()
+    return render_template("index.html", devices=devices)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
